@@ -1,0 +1,359 @@
+<html>
+        <head><title>Downloaded HTML</title></head>
+        <body>
+            <pre style="white-space: pre-wrap; word-wrap: break-word;"><!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RIDDLES with Achievements</title>
+<style>
+  body {
+    margin: 20px;
+    font-family: 'Arial', sans-serif;
+    background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.1&auto=format&fit=crop&w=1470&q=80');
+    background-size: cover;
+    background-position: center;
+    color: #fff;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+    transition: all 0.5s ease;
+    padding: 10px;
+  }
+  h1 { text-align: center; }
+
+  /* User profile (no profile picture upload) */
+  #user-profile {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 10px; justify-content: center;
+  }
+  #user-info {
+    display: flex; flex-direction: column; align-items: center;
+  }
+  /* Profile controls */
+  #profile-controls {
+    display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; justify-content: center;
+  }
+  /* Controls styling */
+  #controls {
+    display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; justify-content: center;
+  }
+  button { padding: 10px; font-size: 1em; border-radius: 5px; border: none; cursor: pointer; }
+  select { padding: 10px; font-size: 1em; border-radius: 5px; border: none; }
+  /* Riddle area */
+  #riddle-area {
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(0,0,0,0.5);
+    border-radius: 10px;
+  }
+  #riddleText { font-size: 1.2em; margin-bottom: 15px; }
+  #answerInput { width: 100%; padding: 10px; font-size: 1em; border-radius: 5px; border: none; }
+  #feedback, #hint, #message, #score { margin-top: 10px; font-weight: bold; }
+  #progressContainer {
+    width: 100%; background: #555; border-radius: 10px; overflow: hidden; margin-top: 15px;
+  }
+  #progressBar {
+    height: 20px; width: 0%; background: #4caf50; transition: width 0.3s;
+  }
+  #achievements { margin-top: 20px; padding: 10px; background: rgba(68,68,68,0.8); border-radius: 8px; }
+  #achievements h3 { margin-top: 0; color: #fff; }
+  ul { list-style: none; padding: 0; margin: 0; }
+  li { margin-bottom: 5px; }
+  @media(max-width: 900px) {
+    body { font-size: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<h1>RIDDLES</h1>
+
+<!-- User profile -->
+<div id="user-profile">
+  <div id="user-info">
+    <input type="text" id="usernameInput" placeholder="Enter Username" />
+    <div id="userStatus">No user loaded</div>
+    <div class="profile-controls">
+      <button id="loadUserBtn">Load User</button>
+      <button id="saveUserBtn">Save Progress</button>
+      <button id="deleteUserBtn">Delete User</button>
+      <button id="resetProgressBtn">Reset Progress</button>
+    </div>
+  </div>
+</div>
+
+<!-- Game controls -->
+<div id="controls">
+  <button id="generateBtn">Generate Riddle</button>
+  <button id="nextBtn">Next Riddle</button>
+  <button id="answerBtn">Submit Answer</button>
+  <button id="hintBtn">Hint</button>
+</div>
+
+<!-- Riddle display area -->
+<div id="riddle-area">
+  <div id="riddleText">Click "Generate Riddle"</div>
+  <input type="text" id="answerInput" placeholder="Your answer here" />
+  <div id="feedback"></div>
+  <div id="hint"></div>
+  <div id="score">Score: 0</div>
+  <div id="progressContainer"><div id="progressBar"></div></div>
+  <div id="achievements">
+    <h3>Achievements</h3>
+    <ul>
+      <li id="achievement-correct">Correct Answers: 0</li>
+      <li id="achievement-highscore">High Score: 0</li>
+    </ul>
+  </div>
+  <div id="message"></div>
+  <div id="highScoresContainer" style="margin-top:10px;">
+    <h3>Global High Scores</h3>
+    <ol id="highScores"></ol>
+  </div>
+</div>
+
+<!-- Sounds -->
+<audio id="correctSound" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
+<audio id="wrongSound" src="https://www.soundjay.com/buttons/sounds/button-10.mp3"></audio>
+<audio id="hintSound" src="https://www.soundjay.com/buttons/sounds/button-4.mp3"></audio>
+
+<script>
+// Riddles array (same as before)
+const riddles = [
+  { question: "What has to be broken before you can use it?", answer: "egg", hint: "It's a common breakfast item.", difficulty: "easy" },
+  { question: "I’m tall when I’m young, and I’m short when I’m old. What am I?", answer: "candle", hint: "I melt as I get older.", difficulty: "easy" },
+  { question: "What gets wetter the more it dries?", answer: "towel", hint: "You use me after a shower.", difficulty: "medium" },
+  { question: "What has keys but can’t open locks?", answer: "piano", hint: "You play me with your fingers.", difficulty: "medium" },
+  { question: "The more you take, the more you leave behind. What are they?", answer: "footsteps", hint: "You make them when walking.", difficulty: "hard" },
+  { question: "I speak without a mouth and hear without ears. I have nobody, but I come alive with the wind. What am I?", answer: "echo", hint: "You hear me in mountains or valleys.", difficulty: "hard" },
+  { question: "What has a head, a tail, but no body?", answer: "coin", hint: "It's metal and often flipped.", difficulty: "easy" },
+  { question: "What can travel around the world while staying in the same corner?", answer: "stamp", hint: "It's used to send mail.", difficulty: "medium" },
+  { question: "What has hands but can’t clap?", answer: "clock", hint: "It tells time.", difficulty: "easy" },
+  { question: "What begins with T, ends with T, and has T in it?", answer: "teapot", hint: "You pour tea from me.", difficulty: "medium" },
+  { question: "What has an eye but cannot see?", answer: "needle", hint: "Used for sewing.", difficulty: "easy" },
+  { question: "What has a neck but no head?", answer: "bottle", hint: "You drink from me.", difficulty: "easy" },
+  { question: "What comes once in a minute, twice in a moment, but never in a thousand years?", answer: "m", hint: "It's a letter.", difficulty: "medium" },
+  { question: "What is always in front of you but can’t be seen?", answer: "future", hint: "It's coming but unseen.", difficulty: "hard" },
+  { question: "What has a thumb and four fingers, but is not alive?", answer: "glove", hint: "You wear me on your hand.", difficulty: "easy" },
+  { question: "What is full of holes but still holds water?", answer: "sponge", hint: "Used for cleaning.", difficulty: "medium" },
+  { question: "What goes up but never comes down?", answer: "age", hint: "It increases as time passes.", difficulty: "easy" },
+  { question: "What can run but never walks, has a mouth but never talks?", answer: "river", hint: "It flows through valleys and plains.", difficulty: "medium" },
+  { question: "What has an end but no beginning?", answer: "thread", hint: "Used for sewing.", difficulty: "hard" },
+  { question: "What has many teeth but cannot bite?", answer: "comb", hint: "You use it on your hair.", difficulty: "easy" },
+  { question: "What has a face and two hands but no arms or legs?", answer: "clock", hint: "It tells time.", difficulty: "easy" },
+  { question: "What is so fragile that saying its name breaks it?", answer: "silence", hint: "It's the absence of sound.", difficulty: "hard" },
+  { question: "What starts with an E, ends with an E, but only contains one letter?", answer: "envelope", hint: "You put a letter inside.", difficulty: "medium" },
+  { question: "What can stand without moving?", answer: "mountain", hint: "It’s a large natural elevation.", difficulty: "hard" },
+  { question: "What begins with P, ends with E, and has thousands of letters?", answer: "post office", hint: "It handles mail.", difficulty: "medium" },
+  { question: "What has wheels and flies but is not an insect?", answer: "garbage truck", hint: "It carries trash.", difficulty: "hard" }
+];
+
+let currentRiddle = null;
+let score = 0;
+let correctAnswersCount = 0;
+let revealIndex = 0;
+const answerMaxDistance = 2;
+let currentUser = null;
+let userData = {}; // user-specific data
+
+// Set background to nature directly
+document.body.style.backgroundImage = 'url(https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.1&auto=format&fit=crop&w=1470&q=80)';
+document.body.style.backgroundSize = 'cover';
+document.body.style.backgroundPosition = 'center';
+
+// --- DOM Elements ---
+const riddleText = document.getElementById('riddleText');
+const feedbackEl = document.getElementById('feedback');
+const hintEl = document.getElementById('hint');
+const answerInput = document.getElementById('answerInput');
+const scoreEl = document.getElementById('score');
+const progressBar = document.getElementById('progressBar');
+const achievementCorrect = document.getElementById('achievement-correct');
+const achievementHighScore = document.getElementById('achievement-highscore');
+const highScoresEl = document.getElementById('highScores');
+const userStatus = document.getElementById('userStatus');
+
+const correctSound = document.getElementById('correctSound');
+const wrongSound = document.getElementById('wrongSound');
+const hintSound = document.getElementById('hintSound');
+
+const difficultyFilter = document.getElementById('difficultyFilter');
+
+// --- Load and Save User Data ---
+function loadUser() {
+  const username = document.querySelector('#usernameInput').value.trim();
+  if (!username) {
+    alert('Enter a username first!');
+    return;
+  }
+  currentUser = username;
+  const stored = localStorage.getItem('user_' + username);
+  userData = stored ? JSON.parse(stored) : {
+    score: 0,
+    achievements: {
+      correctAnswers: 0,
+      highScore: 0
+    }
+  };
+  document.getElementById('userStatus').textContent = `Loaded user: ${username}`;
+  score = userData.score || 0;
+  correctAnswersCount = userData.achievements.correctAnswers || 0;
+  updateScoresDisplay();
+  updateAchievements();
+  updateHighScores();
+}
+
+function saveUser() {
+  if (!currentUser) {
+    alert('Load a user first!');
+    return;
+  }
+  userData.score = score;
+  userData.achievements.correctAnswers = correctAnswersCount;
+  localStorage.setItem('user_' + currentUser, JSON.stringify(userData));
+  alert('Progress saved!');
+  updateHighScores();
+}
+
+function deleteUser() {
+  if (!currentUser) return;
+  if (confirm(`Delete user ${currentUser}?`)) {
+    localStorage.removeItem('user_' + currentUser);
+    alert('User deleted.');
+    document.getElementById('userStatus').textContent = 'No user loaded';
+    score = 0;
+    correctAnswersCount=0;
+    updateScoresDisplay();
+    updateAchievements();
+    updateHighScores();
+  }
+}
+
+function resetProgress() {
+  if (!currentUser) return;
+  if (confirm(`Reset progress for ${currentUser}?`)) {
+    score = 0;
+    correctAnswersCount=0;
+    userData = {
+      score: 0,
+      achievements: {
+        correctAnswers: 0,
+        highScore: 0
+      }
+    };
+    localStorage.setItem('user_' + currentUser, JSON.stringify(userData));
+    updateScoresDisplay();
+    updateAchievements();
+  }
+}
+
+// --- UI updates ---
+function updateScoresDisplay() {
+  document.getElementById('score').textContent = `Score: ${score}`;
+  const progressPercent = Math.min((score / 100) * 100, 100);
+  progressBar.style.width = progressPercent + '%';
+}
+
+function updateAchievements() {
+  document.getElementById('achievement-correct').textContent = 'Correct Answers: ' + correctAnswersCount;
+  const highScoreVal = userData.achievements.highScore || 0;
+  document.getElementById('achievement-highscore').textContent = 'High Score: ' + highScoreVal;
+}
+
+function updateHighScores() {
+  let allScores = JSON.parse(localStorage.getItem('allScores')) || {};
+  if (currentUser) {
+    allScores[currentUser] = Math.max(score, allScores[currentUser] || 0);
+  }
+  let entries = Object.entries(allScores).sort((a,b) => b[1]-a[1]);
+  document.getElementById('highScores').innerHTML = entries.slice(0,10).map(e => `<li>${e[0]}: ${e[1]}</li>`).join('');
+}
+
+// --- Generate Riddle ---
+function generateRiddle() {
+  const filter = document.getElementById('difficultyFilter').value;
+  let filtered = riddles;
+  if (filter !== 'all') {
+    filtered = riddles.filter(r => r.difficulty === filter);
+  }
+  if (filtered.length === 0) {
+    document.getElementById('riddleText').textContent = "No riddles for this difficulty.";
+    currentRiddle = null;
+    return;
+  }
+  currentRiddle = filtered[Math.floor(Math.random() * filtered.length)];
+  document.getElementById('riddleText').textContent = currentRiddle.question;
+  document.getElementById('feedback').textContent = "";
+  document.getElementById('hint').textContent = "";
+  document.getElementById('answerInput').value = "";
+  revealIndex = 0;
+  currentHint = "";
+  document.getElementById('message').textContent = "";
+}
+
+// --- Event handlers ---
+document.getElementById('loadUserBtn').onclick = loadUser;
+document.getElementById('saveUserBtn').onclick = saveUser;
+document.getElementById('deleteUserBtn').onclick = deleteUser;
+document.getElementById('resetProgressBtn').onclick = resetProgress;
+document.getElementById('generateBtn').onclick = generateRiddle;
+document.getElementById('nextBtn').onclick = generateRiddle;
+
+document.getElementById('answerBtn').onclick = () => {
+  if (!currentRiddle) return;
+  const userAns = document.getElementById('answerInput').value.trim().toLowerCase();
+  const correctAns = currentRiddle.answer.toLowerCase();
+  if (userAns === correctAns) {
+    let pts = 0;
+    if (currentRiddle.difficulty==='easy') pts=5;
+    else if (currentRiddle.difficulty==='medium') pts=10;
+    else if (currentRiddle.difficulty==='hard') pts=15;
+    document.getElementById('feedback').textContent = `Correct! +${pts} points!`;
+    score += pts;
+    correctAnswersCount++;
+    if (score > (userData.achievements.highScore || 0)) {
+      userData.achievements.highScore = score;
+    }
+    updateAchievements();
+    document.getElementById('correctSound').play();
+  } else {
+    const deduction = Math.floor(score/2);
+    score -= deduction;
+    if (score<0) score=0;
+    document.getElementById('feedback').textContent = `Wrong! -${deduction} points!`;
+    document.getElementById('wrongSound').play();
+  }
+  document.getElementById('score').textContent = `Score: ${score}`;
+  if (currentUser) {
+    userData.score = score;
+    localStorage.setItem('user_' + currentUser, JSON.stringify(userData));
+  }
+  updateHighScores();
+  updateAchievements();
+};
+
+document.getElementById('hintBtn').onclick = () => {
+  if (!currentRiddle) return;
+  const answer = currentRiddle.answer;
+  revealIndex += Math.ceil(answer.length/4);
+  if (revealIndex > answer.length) revealIndex = answer.length;
+  currentHint = answer.substring(0, revealIndex);
+  if (revealIndex === answer.length) {
+    document.getElementById('message').textContent = "Hint reveals the full answer!";
+    document.getElementById('hint').textContent = "Answer: " + currentHint + (revealIndex<answer.length ? "..." : "");
+  } else {
+    document.getElementById('message').textContent = "";
+    document.getElementById('hint').textContent = "Answer: " + currentHint + (revealIndex<answer.length ? "..." : "");
+    document.getElementById('hintSound').play();
+  }
+};
+
+// --- Initialize ---
+document.getElementById('difficultyFilter').value = 'all';
+
+</script>
+</body>
+</html></pre>
+        </body>
+    </html>
